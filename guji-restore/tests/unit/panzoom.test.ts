@@ -9,6 +9,7 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
   panBy,
+  shouldZoomOnWheel,
   zoomAt
 } from '../../src/lib/panzoom';
 
@@ -124,6 +125,28 @@ describe('clampView', () => {
     expect(v.zoom).toBe(MAX_ZOOM);
     expect(v.cx).toBe(-0.5);
     expect(v.cy).toBe(1.5);
+  });
+});
+
+describe('shouldZoomOnWheel（横向滚动不触发缩放）', () => {
+  it('纵向滚动 → 缩放', () => {
+    expect(shouldZoomOnWheel({ deltaX: 0, deltaY: -120 })).toBe(true);
+    expect(shouldZoomOnWheel({ deltaX: 0, deltaY: 120 })).toBe(true);
+  });
+  it('纵向为主的斜向滚动 → 缩放', () => {
+    expect(shouldZoomOnWheel({ deltaX: 10, deltaY: 40 })).toBe(true);
+    expect(shouldZoomOnWheel({ deltaX: 30, deltaY: 30 })).toBe(true);
+  });
+  it('纯横向滚动（deltaY 为 0）→ 不缩放', () => {
+    expect(shouldZoomOnWheel({ deltaX: 120, deltaY: 0 })).toBe(false);
+    expect(shouldZoomOnWheel({ deltaX: -80, deltaY: 0 })).toBe(false);
+  });
+  it('横向为主的触控板滚动 → 不缩放', () => {
+    expect(shouldZoomOnWheel({ deltaX: 100, deltaY: 20 })).toBe(false);
+    expect(shouldZoomOnWheel({ deltaX: -53, deltaY: 1 })).toBe(false);
+  });
+  it('完全静止的事件 → 不缩放', () => {
+    expect(shouldZoomOnWheel({ deltaX: 0, deltaY: 0 })).toBe(false);
   });
 });
 

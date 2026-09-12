@@ -7,6 +7,7 @@
     fitView,
     imageTransform,
     panBy,
+    shouldZoomOnWheel,
     zoomAt,
     type ViewState
   } from '../lib/panzoom';
@@ -66,6 +67,9 @@
 
   function onWheel(e: WheelEvent, which: 'before' | 'after') {
     if (!canView) return;
+    // 触控板横向滚动（deltaX 为主或无纵向分量）不缩放、不拦截，保留默认行为
+    if (!shouldZoomOnWheel(e)) return;
+    e.preventDefault();
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const anchor = { x: e.clientX - r.left, y: e.clientY - r.top };
     const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
@@ -145,7 +149,7 @@
       class:dragging
       bind:clientWidth={paneW}
       bind:clientHeight={paneH}
-      on:wheel|preventDefault={(e) => onWheel(e, 'before')}
+      on:wheel={(e) => onWheel(e, 'before')}
       on:pointerdown={(e) => onPointerDown(e, 'before')}
       on:pointermove={onPointerMove}
       on:pointerup={onPointerUp}
@@ -160,7 +164,7 @@
       class="pane after"
       class:dragging
       style={mode === 'slide' ? `clip-path: inset(0 0 0 ${slider}%)` : ''}
-      on:wheel|preventDefault={(e) => onWheel(e, 'after')}
+      on:wheel={(e) => onWheel(e, 'after')}
       on:pointerdown={(e) => onPointerDown(e, 'after')}
       on:pointermove={onPointerMove}
       on:pointerup={onPointerUp}

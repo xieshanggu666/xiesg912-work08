@@ -50,6 +50,21 @@ test('前后对比：缩放、平移、复位，前后两图同步', async ({ pa
   expect(tAfter).toBe(t1);
 });
 
+test('前后对比：横向滚动不误触发缩放', async ({ page }) => {
+  await loadSampleAndGotoCompare(page);
+  await expect(page.locator('.zoombar .pct')).toHaveText('100%');
+  const box = (await page.locator('.pane.before').boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  // 触控板横向滚动：纯横向 / 横向为主 → 缩放比例不变
+  await page.mouse.wheel(120, 0);
+  await page.mouse.wheel(100, 20);
+  await page.mouse.wheel(-90, 10);
+  await expect(page.locator('.zoombar .pct')).toHaveText('100%');
+  // 纵向滚动仍然缩放
+  await page.mouse.wheel(0, -120);
+  await expect(page.locator('.zoombar .pct')).toHaveText('115%');
+});
+
 test('前后对比：切换模式保留观察位置', async ({ page }) => {
   await loadSampleAndGotoCompare(page);
   await page.getByRole('button', { name: '放大' }).click();

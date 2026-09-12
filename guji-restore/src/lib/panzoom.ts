@@ -61,6 +61,14 @@ export function contentToScreen(v: ViewState, fit: number, img: Size, view: Size
 }
 
 /**
+ * 是否响应此滚轮事件做缩放：仅纵向为主的滚动才缩放。
+ * 触控板横向滚动（deltaX 为主，或 deltaY 为 0）不触发缩放，也不应被拦截默认行为。
+ */
+export function shouldZoomOnWheel(e: { deltaX: number; deltaY: number }): boolean {
+  return e.deltaY !== 0 && Math.abs(e.deltaY) >= Math.abs(e.deltaX);
+}
+
+/**
  * 以容器内点 anchor 为锚缩放 factor 倍：缩放前后锚点下的图像内容保持不动。
  */
 export function zoomAt(v: ViewState, factor: number, anchor: Point, view: Size, img: Size, fit: number): ViewState {
